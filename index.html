@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoTrack — Carbon Footprint Calculator</title>
+
+  <!-- Bootstrap 5 CDN -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Google Fonts: Playfair Display (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ============================================================
+       CSS CUSTOM PROPERTIES — Nature & Sustainability Palette
+       ============================================================ */
+    :root {
+      --green-deep:    #1a3d2b;   /* Dark forest green — primary text / accents */
+      --green-mid:     #2d6a4f;   /* Mid canopy green — buttons, highlights */
+      --green-light:   #52b788;   /* Fresh fern — hover states, badges */
+      --green-pale:    #d8f3dc;   /* Morning mist green — subtle backgrounds */
+      --cream:         #f8f5f0;   /* Warm off-white — page background */
+      --slate:         #4a5568;   /* Slate gray — secondary text */
+      --slate-light:   #e2e8f0;   /* Light slate — borders, dividers */
+      --white:         #ffffff;
+      --shadow-sm:     0 2px 8px rgba(26, 61, 43, 0.08);
+      --shadow-md:     0 6px 24px rgba(26, 61, 43, 0.12);
+      --shadow-lg:     0 12px 40px rgba(26, 61, 43, 0.16);
+      --radius:        16px;
+      --radius-sm:     10px;
+    }
+
+    /* ============================================================
+       GLOBAL BASE STYLES
+       ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--cream);
+      color: var(--green-deep);
+      line-height: 1.7;
+      font-size: 1rem;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Smooth page-load fade-in */
+    body {
+      animation: pageFadeIn 0.6s ease both;
+    }
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       NAVBAR
+       ============================================================ */
+    .eco-navbar {
+      background-color: var(--white);
+      border-bottom: 1px solid var(--slate-light);
+      padding: 1rem 0;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .eco-navbar .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .eco-navbar .brand .leaf-icon {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      background: var(--green-mid);
+      border-radius: 50% 0 50% 0;   /* Leaf shape */
+      transform: rotate(-30deg);
+      flex-shrink: 0;
+    }
+
+    .eco-navbar .nav-tagline {
+      font-size: 0.8rem;
+      color: var(--slate);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+
+    /* ============================================================
+       HERO SECTION
+       ============================================================ */
+    .hero {
+      /* Layered radial gradient for depth — avoids flat solid backgrounds */
+      background:
+        radial-gradient(ellipse at 80% 20%, rgba(82, 183, 136, 0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 10% 90%, rgba(45, 106, 79, 0.14) 0%, transparent 50%),
+        var(--cream);
+      padding: 5rem 0 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative background ring */
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border: 60px solid rgba(82, 183, 136, 0.08);
+      border-radius: 50%;
+      top: -160px;
+      right: -160px;
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border: 40px solid rgba(45, 106, 79, 0.07);
+      border-radius: 50%;
+      bottom: -80px;
+      left: -80px;
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--green-pale);
+      color: var(--green-mid);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.85rem;
+      border-radius: 50px;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(45, 106, 79, 0.2);
+    }
+
+    .hero-badge .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--green-light);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%       { transform: scale(1.4); opacity: 0.7; }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 6vw, 4.5rem);
+      font-weight: 700;
+      color: var(--green-deep);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    /* Highlighted word with a brush-stroke underline effect */
+    .hero h1 .highlight {
+      position: relative;
+      color: var(--green-mid);
+    }
+
+    .hero h1 .highlight::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -4px;
+      width: 100%;
+      height: 4px;
+      background: var(--green-light);
+      border-radius: 2px;
+      opacity: 0.7;
+    }
+
+    .hero-lead {
+      font-size: 1.15rem;
+      color: var(--slate);
+      font-weight: 300;
+      max-width: 500px;
+      margin-bottom: 2.2rem;
+    }
+
+    /* CTA Button — primary */
+    .btn-eco {
+      background: var(--green-mid);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.75rem 2rem;
+      border-radius: 50px;
+      border: none;
+      box-shadow: 0 4px 16px rgba(45, 106, 79, 0.3);
+      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-eco:hover {
+      background: var(--green-deep);
+      box-shadow: 0 6px 20px rgba(45, 106, 79, 0.4);
+      transform: translateY(-2px);
+      color: var(--white);
+    }
+
+    /* Hero stats row */
+    .hero-stats {
+      display: flex;
+      gap: 2rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero-stat .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--green-mid);
+      line-height: 1;
+    }
+
+    .hero-stat .stat-label {
+      font-size: 0.78rem;
+      color: var(--slate);
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      margin-top: 0.15rem;
+    }
+
+    /* Hero illustration — pure CSS leaf cluster (decorative) */
+    .hero-illustration {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .leaf-cluster {
+      position: relative;
+      width: 240px;
+      height: 240px;
+    }
+
+    .leaf-cluster .leaf {
+      position: absolute;
+      border-radius: 50% 0 50% 0;
+    }
+
+    .leaf-cluster .leaf-1 {
+      width: 120px; height: 120px;
+      background: var(--green-mid);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(-20deg);
+      opacity: 0.9;
+    }
+
+    .leaf-cluster .leaf-2 {
+      width: 90px; height: 90px;
+      background: var(--green-light);
+      top: 20%; left: 55%;
+      transform: rotate(40deg);
+      opacity: 0.8;
+    }
+
+    .leaf-cluster .leaf-3 {
+      width: 70px; height: 70px;
+      background: var(--green-deep);
+      top: 55%; left: 20%;
+      transform: rotate(-50deg);
+      opacity: 0.75;
+    }
+
+    .leaf-cluster .leaf-4 {
+      width: 50px; height: 50px;
+      background: var(--green-pale);
+      border: 2px solid var(--green-light);
+      top: 15%; left: 20%;
+      transform: rotate(10deg);
+    }
+
+    .leaf-cluster .circle-bg {
+      position: absolute;
+      width: 200px; height: 200px;
+      background: var(--green-pale);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+    }
+
+    /* ============================================================
+       SECTION WRAPPER UTILITY
+       ============================================================ */
+    .section-pad {
+      padding: 4.5rem 0;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green-light);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 600;
+      color: var(--green-deep);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-divider {
+      width: 48px;
+      height: 3px;
+      background: var(--green-light);
+      border-radius: 2px;
+      margin: 1rem 0 2.5rem;
+    }
+
+    /* ============================================================
+       HOW IT WORKS SECTION
+       ============================================================ */
+    .how-section {
+      background: var(--white);
+      border-top: 1px solid var(--slate-light);
+      border-bottom: 1px solid var(--slate-light);
+    }
+
+    .step-card {
+      background: var(--cream);
+      border: 1px solid var(--slate-light);
+      border-radius: var(--radius);
+      padding: 2rem 1.75rem;
+      height: 100%;
+      position: relative;
+      transition: box-shadow 0.25s, transform 0.25s;
+    }
+
+    .step-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+    }
+
+    /* Step number — large decorative numeral */
+    .step-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--green-pale);
+      line-height: 1;
+      margin-bottom: 0.75rem;
+      /* Overlapping text effect */
+      letter-spacing: -0.02em;
+    }
+
+    .step-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      background: var(--green-pale);
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+
+    .step-card h5 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--green-deep);
+      margin-bottom: 0.5rem;
+    }
+
+    .step-card p {
+      font-size: 0.9rem;
+      color: var(--slate);
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    /* Connector line between steps (desktop only) */
+    .steps-connector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 1.5rem;
+    }
+
+    .connector-arrow {
+      width: 32px;
+      height: 2px;
+      background: var(--slate-light);
+      position: relative;
+    }
+
+    .connector-arrow::after {
+      content: '→';
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--slate-light);
+      font-size: 1rem;
+    }
+
+    /* ============================================================
+       FORM CARD SECTION
+       ============================================================ */
+    .calculator-section {
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(82, 183, 136, 0.1) 0%, transparent 50%),
+        var(--cream);
+    }
+
+    .form-card {
+      background: var(--white);
+      border: 1px solid var(--slate-light);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top accent bar on the card */
+    .form-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--green-mid), var(--green-light));
+    }
+
+    .form-card h3 {
+      font-size: 1.5rem;
+      color: var(--green-deep);
+      margin-bottom: 0.25rem;
+    }
+
+    .form-card .card-subtitle {
+      font-size: 0.88rem;
+      color: var(--slate);
+      margin-bottom: 2rem;
+    }
+
+    /* Custom form control styles */
+    .eco-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--green-deep);
+      margin-bottom: 0.45rem;
+      display: block;
+    }
+
+    .eco-input,
+    .eco-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: var(--green-deep);
+      background: var(--cream);
+      border: 1.5px solid var(--slate-light);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .eco-input:focus,
+    .eco-select:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.2);
+      background: var(--white);
+    }
+
+    /* Custom select arrow */
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-wrapper::after {
+      content: '▾';
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--green-mid);
+      pointer-events: none;
+      font-size: 0.9rem;
+    }
+
+    /* Input hint text */
+    .input-hint {
+      font-size: 0.78rem;
+      color: var(--slate);
+      margin-top: 0.35rem;
+    }
+
+    /* Transport mode icon badges */
+    .transport-badges {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .transport-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 50px;
+      border: 1.5px solid var(--slate-light);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--slate);
+      background: var(--cream);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+
+    .transport-badge:hover,
+    .transport-badge.active {
+      border-color: var(--green-light);
+      background: var(--green-pale);
+      color: var(--green-deep);
+    }
+
+    /* Calculate button */
+    .btn-calculate {
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, var(--green-mid), var(--green-deep));
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(45, 106, 79, 0.35);
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      letter-spacing: 0.02em;
+      margin-top: 0.5rem;
+    }
+
+    .btn-calculate:hover {
+      opacity: 0.92;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(45, 106, 79, 0.4);
+    }
+
+    .btn-calculate:active {
+      transform: translateY(0);
+    }
+
+    /* ============================================================
+       RESULTS PLACEHOLDER AREA
+       ============================================================ */
+    .results-card {
+      background: var(--white);
+      border: 1.5px dashed var(--slate-light);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      text-align: center;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 280px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Waiting state — shown before calculation */
+    .results-waiting {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .results-waiting .icon-ring {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--green-pale);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+
+    .results-waiting h5 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--green-deep);
+      margin: 0;
+    }
+
+    .results-waiting p {
+      font-size: 0.85rem;
+      color: var(--slate);
+      margin: 0;
+      max-width: 220px;
+      line-height: 1.6;
+    }
+
+    /* --- Score Display (hidden by default; JS will show this) --- */
+    .results-score {
+      display: none; /* JS will toggle to flex */
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+    }
+
+    .score-ring {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 6px solid var(--green-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--green-pale);
+      box-shadow: 0 0 0 10px rgba(82, 183, 136, 0.1);
+    }
+
+    .score-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      line-height: 1;
+    }
+
+    .score-unit {
+      font-size: 0.7rem;
+      color: var(--slate);
+      font-weight: 500;
+    }
+
+    .score-label {
+      font-size: 0.85rem;
+      color: var(--slate);
+      font-weight: 500;
+    }
+
+    /* Green Tip box */
+    .green-tip {
+      background: var(--green-pale);
+      border-left: 3px solid var(--green-light);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 0.85rem 1.1rem;
+      text-align: left;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .green-tip .tip-header {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin-bottom: 0.25rem;
+    }
+
+    .green-tip p {
+      font-size: 0.85rem;
+      color: var(--green-deep);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .eco-footer {
+      background: var(--green-deep);
+      color: rgba(255, 255, 255, 0.65);
+      padding: 2.5rem 0;
+      font-size: 0.85rem;
+    }
+
+    .eco-footer .brand-footer {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .eco-footer a {
+      color: var(--green-light);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .eco-footer a:hover {
+      color: var(--white);
+    }
+
+    .eco-footer .footer-divider {
+      border-color: rgba(255, 255, 255, 0.1);
+      margin: 1.5rem 0;
+    }
+
+    /* ============================================================
+       RESPONSIVE TWEAKS
+       ============================================================ */
+    @media (max-width: 767.98px) {
+      .hero {
+        padding: 3.5rem 0 3rem;
+        text-align: center;
+      }
+
+      .hero-lead {
+        max-width: 100%;
+      }
+
+      .hero-stats {
+        justify-content: center;
+      }
+
+      .hero-illustration {
+        display: none; /* Hide decorative SVG on mobile */
+      }
+
+      .form-card {
+        padding: 1.75rem;
+      }
+
+      .steps-connector {
+        display: none;
+      }
+
+      .section-pad {
+        padding: 3rem 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================================================
+       NAVBAR
+       ============================================================ -->
+  <nav class="eco-navbar">
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-between">
+
+        <!-- Brand -->
+        <a href="#" class="brand">
+          <span class="leaf-icon"></span>
+          EcoTrack
+        </a>
+
+        <!-- Nav tagline (desktop only) -->
+        <span class="nav-tagline d-none d-md-block">
+          Know your footprint. Own your impact.
+        </span>
+
+        <!-- CTA pill -->
+        <a href="#calculator" class="btn-eco" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">
+          Calculate Now
+        </a>
+
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- ============================================================
+       HERO SECTION
+       ============================================================ -->
+  <section class="hero">
+    <div class="container">
+      <div class="row align-items-center g-4">
+
+        <!-- Left: Copy -->
+        <div class="col-lg-7">
+
+          <!-- Pill badge -->
+          <div class="hero-badge">
+            <span class="dot"></span>
+            Free Carbon Calculator
+          </div>
+
+          <!-- Headline -->
+          <h1>
+            Track your commute.<br />
+            <span class="highlight">Protect</span> the planet.
+          </h1>
+
+          <!-- Sub-copy -->
+          <p class="hero-lead">
+            EcoTrack helps you understand the environmental cost of your daily
+            journey — and gives you smarter, greener alternatives.
+          </p>
+
+          <!-- CTA -->
+          <a href="#calculator" class="btn-eco">
+            ↓ &nbsp; Start Calculating
+          </a>
+
+          <!-- Stats row -->
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="stat-number">4.6T</span>
+              <span class="stat-label">Tonnes CO₂ from transport/yr</span>
+            </div>
+            <div class="hero-stat" style="border-left: 1px solid var(--slate-light); padding-left: 2rem;">
+              <span class="stat-number">29%</span>
+              <span class="stat-label">Of global emissions from travel</span>
+            </div>
+            <div class="hero-stat" style="border-left: 1px solid var(--slate-light); padding-left: 2rem;">
+              <span class="stat-number">1</span>
+              <span class="stat-label">Small step → big change</span>
+            </div>
+          </div>
+
+        </div><!-- /col -->
+
+        <!-- Right: CSS Leaf Illustration -->
+        <div class="col-lg-5 hero-illustration">
+          <div class="leaf-cluster">
+            <div class="circle-bg"></div>
+            <div class="leaf leaf-1"></div>
+            <div class="leaf leaf-2"></div>
+            <div class="leaf leaf-3"></div>
+            <div class="leaf leaf-4"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section><!-- /hero -->
+
+
+  <!-- ============================================================
+       HOW IT WORKS SECTION
+       ============================================================ -->
+  <section class="how-section section-pad">
+    <div class="container">
+
+      <!-- Section header -->
+      <div class="text-center mb-2">
+        <span class="section-label">Simple & Fast</span>
+        <h2 class="section-title">How it works</h2>
+        <div class="section-divider mx-auto"></div>
+      </div>
+
+      <!-- 3-step cards -->
+      <div class="row g-4 justify-content-center">
+
+        <!-- Step 1 -->
+        <div class="col-md-4 col-sm-10">
+          <div class="step-card">
+            <div class="step-number">01</div>
+            <div class="step-icon">📏</div>
+            <h5>Enter Your Distance</h5>
+            <p>
+              Input how many miles you travel each day for your commute —
+              one way or round trip, your choice.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="col-md-4 col-sm-10">
+          <div class="step-card">
+            <div class="step-number">02</div>
+            <div class="step-icon">🚗</div>
+            <h5>Choose Your Transport</h5>
+            <p>
+              Select your mode of travel — gas car, electric vehicle,
+              bus, or bicycle — for an accurate emissions estimate.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="col-md-4 col-sm-10">
+          <div class="step-card">
+            <div class="step-number">03</div>
+            <div class="step-icon">🌿</div>
+            <h5>Get Your Carbon Score</h5>
+            <p>
+              Instantly see your CO₂ output and receive a personalised
+              green tip to reduce your environmental impact.
+            </p>
+          </div>
+        </div>
+
+      </div><!-- /row -->
+    </div>
+  </section><!-- /how it works -->
+
+
+  <!-- ============================================================
+       CALCULATOR SECTION — Form + Results
+       ============================================================ -->
+  <section class="calculator-section section-pad" id="calculator">
+    <div class="container">
+
+      <!-- Section header -->
+      <span class="section-label">Your Footprint</span>
+      <h2 class="section-title">Calculate your commute emissions</h2>
+      <div class="section-divider"></div>
+
+      <div class="row g-4 align-items-stretch">
+
+        <!-- ── INPUT FORM CARD ── -->
+        <div class="col-lg-6">
+          <div class="form-card">
+
+            <h3>Commute Details</h3>
+            <p class="card-subtitle">
+              Fill in the fields below and hit Calculate to see your score.
+            </p>
+
+            <!-- Transport Mode Quick-Select Badges -->
+            <!--
+              These visual badges offer a quick UX alternative to the dropdown.
+              JS will sync selection between badges and the <select>.
+            -->
+            <div class="mb-3">
+              <label class="eco-label">Quick-select mode</label>
+              <div class="transport-badges" id="transportBadges" role="group" aria-label="Transport mode selector">
+                <span class="transport-badge active" data-value="gas" tabindex="0">🚗 Gas Car</span>
+                <span class="transport-badge" data-value="ev" tabindex="0">⚡ EV</span>
+                <span class="transport-badge" data-value="bus" tabindex="0">🚌 Bus</span>
+                <span class="transport-badge" data-value="bicycle" tabindex="0">🚲 Bicycle</span>
+              </div>
+            </div>
+
+            <!-- Field 1: Daily Distance -->
+            <div class="mb-4">
+              <label class="eco-label" for="dailyDistance">
+                Daily Distance (miles)
+              </label>
+              <input
+                type="number"
+                id="dailyDistance"
+                class="eco-input"
+                placeholder="e.g. 25"
+                min="0"
+                step="0.1"
+                aria-describedby="distanceHint"
+              />
+              <p class="input-hint" id="distanceHint">
+                Enter your one-way or round-trip commute distance in miles.
+              </p>
+            </div>
+
+            <!-- Field 2: Transportation Mode (Dropdown) -->
+            <div class="mb-4">
+              <label class="eco-label" for="transportMode">
+                Transportation Mode
+              </label>
+              <div class="select-wrapper">
+                <select
+                  id="transportMode"
+                  class="eco-select"
+                  aria-describedby="modeHint"
+                >
+                  <option value="" disabled selected>— Select your vehicle —</option>
+                  <option value="gas">🚗 Gas Car</option>
+                  <option value="ev">⚡ Electric Vehicle (EV)</option>
+                  <option value="bus">🚌 Bus / Public Transit</option>
+                  <option value="bicycle">🚲 Bicycle / On Foot</option>
+                </select>
+              </div>
+              <p class="input-hint" id="modeHint">
+                For hybrid vehicles, select "Gas Car" as an approximation.
+              </p>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              class="btn-calculate"
+              id="calculateBtn"
+              type="button"
+              aria-controls="resultsArea"
+            >
+              🌱 &nbsp; Calculate My Carbon Footprint
+            </button>
+
+          </div><!-- /form-card -->
+        </div><!-- /col -->
+
+
+        <!-- ── RESULTS CARD ── -->
+        <div class="col-lg-6" id="resultsArea">
+          <div class="results-card">
+
+            <!-- Waiting state (default) -->
+            <div class="results-waiting" id="resultsWaiting">
+              <div class="icon-ring">🌍</div>
+              <h5>Your results appear here</h5>
+              <p>
+                Enter your commute details on the left and click
+                <strong>Calculate</strong> to reveal your carbon score.
+              </p>
+            </div>
+
+            <!--
+              Score Display — hidden by default.
+              JavaScript will:
+                1. Hide #resultsWaiting
+                2. Show #resultsScore (set display to flex)
+                3. Populate #scoreValue with kg CO₂
+                4. Populate #greenTipText with a contextual tip
+            -->
+            <div class="results-score" id="resultsScore" aria-live="polite">
+
+              <!-- Score ring -->
+              <div class="score-ring">
+                <span class="score-value" id="scoreValue">—</span>
+                <span class="score-unit">kg CO₂</span>
+              </div>
+
+              <!-- Score label -->
+              <p class="score-label" id="scoreLabel">
+                Daily commute emissions
+              </p>
+
+              <!-- Green Tip Box -->
+              <div class="green-tip" id="greenTipBox">
+                <div class="tip-header">🌿 Green Tip</div>
+                <p id="greenTipText">
+                  Your personalised eco-tip will appear here.
+                </p>
+              </div>
+
+              <!-- Reset link -->
+              <button
+                type="button"
+                id="resetBtn"
+                style="background:none; border:none; color:var(--green-mid); font-size:0.82rem; cursor:pointer; margin-top:0.5rem; font-family:'DM Sans',sans-serif;"
+              >
+                ↩ &nbsp; Recalculate
+              </button>
+
+            </div><!-- /results-score -->
+
+          </div><!-- /results-card -->
+        </div><!-- /col -->
+
+      </div><!-- /row -->
+    </div>
+  </section><!-- /calculator -->
+
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="eco-footer">
+    <div class="container">
+      <div class="row align-items-center">
+
+        <div class="col-md-4 mb-3 mb-md-0">
+          <div class="brand-footer">🌿 EcoTrack</div>
+          <div style="margin-top: 0.35rem; font-size: 0.8rem;">
+            Know your footprint. Own your impact.
+          </div>
+        </div>
+
+        <div class="col-md-4 text-center mb-3 mb-md-0">
+          <span style="font-size: 0.78rem; opacity: 0.6;">
+            Emission factors based on EPA & IEA data.
+          </span>
+        </div>
+
+        <div class="col-md-4 text-md-end">
+          <a href="#">Privacy</a>
+          &nbsp;&middot;&nbsp;
+          <a href="#">Methodology</a>
+          &nbsp;&middot;&nbsp;
+          <a href="#">Contact</a>
+        </div>
+
+      </div>
+
+      <hr class="footer-divider" />
+
+      <div class="text-center" style="font-size: 0.78rem; opacity: 0.5;">
+        &copy; 2025 EcoTrack. Built to help the planet, one commute at a time.
+      </div>
+    </div>
+<div class="container my-5">
+    <div class="card shadow-sm border-0 bg-light">
+        <div class="card-body p-4">
+            <h2 class="text-success mb-3">🌱 EcoTrack: Project Documentation</h2>
+            
+            <section class="mb-4">
+                <h5><strong>Project Description</strong></h5>
+                <p class="text-muted">
+                    EcoTrack is an intuitive web-based dashboard designed to help individuals visualize the environmental impact of their daily commute. By calculating carbon emissions (CO₂e) based on distance and transportation mode, the app transforms abstract data into actionable insights, providing personalized "Green Tips" and an annual tree-offset estimate to encourage more sustainable travel habits.
+                </p>
+            </section>
+
+            <section class="mb-4">
+                <h5><strong>How to Use Instructions</strong></h5>
+                <ul class="text-muted">
+                    <li><strong>Input Distance:</strong> Enter your total daily commute distance in miles in the provided field.</li>
+                    <li><strong>Select Transport:</strong> Choose your mode of travel—either by clicking the visual icon badges or using the dropdown menu.</li>
+                    <li><strong>Analyze:</strong> Click the "Calculate" button to reveal your daily impact and your yearly tree-offset score.</li>
+                    <li><strong>Improve:</strong> Read the personalized "Green Tip" for suggestions on how to lower your carbon footprint.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h5><strong>AI Employee Roster</strong></h5>
+                <p class="text-muted small italic">
+                    Developed as a Final Project using a multi-agent AI workflow:
+                    <br>• <strong>Claude 3.5:</strong> UI/UX Design & Frontend Architecture
+                    <br>• <strong>ChatGPT (GPT-4o):</strong> JavaScript Logic & Emission Mathematics
+                    <br>• <strong>Gemini:</strong> Project Management & Documentation Strategy
+                </p>
+            </section>
+        </div>
+    </div>
+</div>
+  </footer>
+
+
+  <!-- ============================================================
+       Bootstrap 5 JS Bundle (for any BS components if needed)
+       ============================================================ -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  /**
+   * ================================================================
+   * EcoTrack — Carbon Footprint Calculator Logic
+   * ------------------------------------------------
+   * This script powers the EcoTrack commute emissions calculator.
+   *
+   * Responsibilities:
+   * 1. Sync the visual transport badges with the dropdown menu
+   * 2. Calculate commute emissions based on distance + transport type
+   * 3. Display the calculated CO₂ score and contextual eco tip
+   * 4. Estimate annual tree offsets for the user's commute
+   * 5. Reset the interface so the user can calculate again
+   *
+   * Paste this directly below your Bootstrap script tag.
+   * ================================================================
+   */
+
+  document.addEventListener("DOMContentLoaded", () => {
+    /**
+     * ================================================================
+     * DOM REFERENCES
+     * ------------------------------------------------
+     * Cache all frequently used DOM elements once so we can reuse them
+     * throughout the app without repeatedly querying the document.
+     * ================================================================
+     */
+    const transportBadges = document.querySelectorAll(".transport-badge");
+    const transportModeSelect = document.getElementById("transportMode");
+    const dailyDistanceInput = document.getElementById("dailyDistance");
+    const calculateBtn = document.getElementById("calculateBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const resultsWaiting = document.getElementById("resultsWaiting");
+    const resultsScore = document.getElementById("resultsScore");
+    const scoreValue = document.getElementById("scoreValue");
+    const scoreLabel = document.getElementById("scoreLabel");
+    const greenTipText = document.getElementById("greenTipText");
+
+    /**
+     * ================================================================
+     * CONFIGURATION DATA
+     * ------------------------------------------------
+     * Centralized data for:
+     * - Emission factors (kg CO₂ per mile)
+     * - Contextual green tips
+     *
+     * Keeping this in objects makes the app easy to maintain and update.
+     * ================================================================
+     */
+    const EMISSION_FACTORS = {
+      gas: 0.404,
+      ev: 0.100,
+      bus: 0.089,
+      bicycle: 0.000
+    };
+
+    const GREEN_TIPS = {
+      gas: "Try carpooling once or twice a week to cut your commute emissions and fuel costs.",
+      ev: "Great choice. Charging during off-peak hours can make your EV even more sustainable.",
+      bus: "Public transit already lowers your footprint. Combining it with walking boosts your impact even more.",
+      bicycle: "Excellent work — your commute is already one of the greenest possible options. Keep it up."
+    };
+
+    /**
+     * Average mature tree carbon absorption estimate:
+     * A single tree absorbs approximately 21 kg of CO₂ per year.
+     * This is used to estimate how many trees would offset the
+     * user's annual commute emissions.
+     */
+    const TREE_OFFSET_KG_PER_YEAR = 21;
+
+    /**
+     * ================================================================
+     * setActiveBadge(selectedValue)
+     * ------------------------------------------------
+     * Visually updates which transport badge is marked as "active"
+     * based on the currently selected transport type.
+     *
+     * @param {string} selectedValue - The selected transport mode
+     *                                 (gas, ev, bus, bicycle)
+     * ================================================================
+     */
+    function setActiveBadge(selectedValue) {
+      transportBadges.forEach((badge) => {
+        const isMatch = badge.dataset.value === selectedValue;
+        badge.classList.toggle("active", isMatch);
+      });
+    }
+
+    /**
+     * ================================================================
+     * syncDropdownToBadge(selectedValue)
+     * ------------------------------------------------
+     * Updates the dropdown menu so it matches the clicked badge.
+     *
+     * This ensures both UI controls stay synchronized and reflect
+     * the same selected transport method.
+     *
+     * @param {string} selectedValue - The selected transport mode
+     * ================================================================
+     */
+    function syncDropdownToBadge(selectedValue) {
+      transportModeSelect.value = selectedValue;
+      setActiveBadge(selectedValue);
+    }
+
+    /**
+     * ================================================================
+     * calculateEmissions(distance, mode)
+     * ------------------------------------------------
+     * Calculates daily CO₂ emissions by multiplying commute distance
+     * by the selected vehicle's emission factor.
+     *
+     * Formula:
+     *   emissions = distance × emissionFactor
+     *
+     * @param {number} distance - Daily commute distance in miles
+     * @param {string} mode - Selected transport mode
+     * @returns {number} Daily emissions in kg CO₂
+     * ================================================================
+     */
+    function calculateEmissions(distance, mode) {
+      const factor = EMISSION_FACTORS[mode] ?? 0;
+      return distance * factor;
+    }
+
+    /**
+     * ================================================================
+     * calculateTreeOffset(dailyEmissions)
+     * ------------------------------------------------
+     * Estimates how many trees would need to be planted annually
+     * to offset the user's commute emissions.
+     *
+     * Assumption:
+     * - User commutes 5 days per week
+     * - 52 weeks per year
+     *
+     * Annual commute emissions:
+     *   dailyEmissions × 5 × 52
+     *
+     * Trees needed:
+     *   annualEmissions ÷ 21
+     *
+     * @param {number} dailyEmissions - Daily emissions in kg CO₂
+     * @returns {number} Estimated trees needed per year
+     * ================================================================
+     */
+    function calculateTreeOffset(dailyEmissions) {
+      const annualEmissions = dailyEmissions * 5 * 52;
+      return annualEmissions / TREE_OFFSET_KG_PER_YEAR;
+    }
+
+    /**
+     * ================================================================
+     * renderResults(dailyEmissions, mode)
+     * ------------------------------------------------
+     * Updates the results UI with:
+     * - Emissions score
+     * - Green tip
+     * - Tree offset estimate
+     *
+     * It also hides the "waiting" state and shows the "score" state.
+     *
+     * @param {number} dailyEmissions - Calculated daily CO₂ output
+     * @param {string} mode - Selected transport mode
+     * ================================================================
+     */
+    function renderResults(dailyEmissions, mode) {
+      const treesNeeded = calculateTreeOffset(dailyEmissions);
+
+      scoreValue.textContent = dailyEmissions.toFixed(2);
+      scoreLabel.textContent = `Daily commute emissions • ${treesNeeded.toFixed(1)} tree(s) to offset yearly`;
+      greenTipText.textContent = GREEN_TIPS[mode];
+
+      resultsWaiting.style.display = "none";
+      resultsScore.style.display = "flex";
+    }
+
+    /**
+     * ================================================================
+     * resetCalculator()
+     * ------------------------------------------------
+     * Restores the calculator to its original state:
+     * - Clears input values
+     * - Resets dropdown placeholder
+     * - Resets active badge to default
+     * - Hides score results
+     * - Shows waiting state again
+     * ================================================================
+     */
+    function resetCalculator() {
+      dailyDistanceInput.value = "";
+      transportModeSelect.selectedIndex = 0;
+
+      setActiveBadge("gas");
+
+      scoreValue.textContent = "—";
+      scoreLabel.textContent = "Daily commute emissions";
+      greenTipText.textContent = "Your personalised eco-tip will appear here.";
+
+      resultsScore.style.display = "none";
+      resultsWaiting.style.display = "flex";
+    }
+
+    /**
+     * ================================================================
+     * EVENT: Transport Badge Click
+     * ------------------------------------------------
+     * When a user clicks a transport badge:
+     * 1. Read the badge's data-value
+     * 2. Update dropdown to match
+     * 3. Update active badge styling
+     * ================================================================
+     */
+    transportBadges.forEach((badge) => {
+      badge.addEventListener("click", () => {
+        const selectedValue = badge.dataset.value;
+        syncDropdownToBadge(selectedValue);
+      });
+
+      /**
+       * Accessibility enhancement:
+       * Allow Enter / Space to activate badges for keyboard users.
+       */
+      badge.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          const selectedValue = badge.dataset.value;
+          syncDropdownToBadge(selectedValue);
+        }
+      });
+    });
+
+    /**
+     * ================================================================
+     * EVENT: Dropdown Change
+     * ------------------------------------------------
+     * When a user changes the dropdown manually:
+     * 1. Read selected value
+     * 2. Update active badge styling to match
+     * ================================================================
+     */
+    transportModeSelect.addEventListener("change", (event) => {
+      setActiveBadge(event.target.value);
+    });
+
+    /**
+     * ================================================================
+     * EVENT: Calculate Button Click
+     * ------------------------------------------------
+     * Main calculator workflow:
+     * 1. Read form inputs
+     * 2. Validate values
+     * 3. Calculate emissions
+     * 4. Render results
+     * ================================================================
+     */
+    calculateBtn.addEventListener("click", () => {
+      const distance = parseFloat(dailyDistanceInput.value);
+      const mode = transportModeSelect.value;
+
+      if (!distance || distance <= 0) {
+        alert("Please enter a valid commute distance greater than 0.");
+        dailyDistanceInput.focus();
+        return;
+      }
+
+      if (!mode) {
+        alert("Please select a transportation mode.");
+        transportModeSelect.focus();
+        return;
+      }
+
+      const dailyEmissions = calculateEmissions(distance, mode);
+      renderResults(dailyEmissions, mode);
+    });
+
+    /**
+     * ================================================================
+     * EVENT: Reset Button Click
+     * ------------------------------------------------
+     * Clears all user data and restores the initial UI state.
+     * ================================================================
+     */
+    resetBtn.addEventListener("click", resetCalculator);
+  });
+</script>
+
+</body>
+</html>
